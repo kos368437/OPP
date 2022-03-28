@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include <stdio.h>
 
-Matrix createMatrix(int height, int width) {
+Matrix createMatrix(unsigned int height, unsigned int width) {
     Matrix matrix;
 
     matrix.height = height;
@@ -12,13 +12,18 @@ Matrix createMatrix(int height, int width) {
     return matrix;
 }
 
-Matrix readMatrixFromFile(char * filename) {
+Matrix readMatrixFromFile(const char * filename) {
+    Matrix matrix;
     FILE * fin;
     fin = fopen(filename, "r");
 
-    Matrix matrix;
     matrix.height = 0;
     matrix.width = 0;
+
+    if (fin == NULL) {
+        matrix.arr = NULL;
+        return matrix;
+    }
 
     fscanf(fin, "%d %d", &matrix.height, &matrix.width);
 
@@ -31,10 +36,10 @@ Matrix readMatrixFromFile(char * filename) {
     return matrix;
 }
 
-void multiplyMatrix( Matrix dest,  Matrix firstOp,  Matrix secondOp) {
+void multiplyMatrix(Matrix dest,  Matrix firstOp,  Matrix secondOp) {
     for (int i = 0; i < dest.height; ++i) {
         for (int j = 0; j < dest.width; ++j) {
-            dest.arr[i * dest.width + j] = 0;
+            dest.arr[realIndex(dest, i, j)] = 0;
             for (int k = 0; k < firstOp.width; ++k) {
                 dest.arr[realIndex(dest, i, j)] +=
                         firstOp.arr[realIndex(firstOp, i, k)] *
@@ -44,11 +49,15 @@ void multiplyMatrix( Matrix dest,  Matrix firstOp,  Matrix secondOp) {
     }
 }
 
-int realIndex(Matrix matrix, int row, int column) {
+int realIndex(Matrix matrix, unsigned int row, unsigned int column) {
     return row * matrix.width + column;
 }
 
-void copyMatrix( Matrix dest,  Matrix source) {
+void copyMatrix(Matrix dest,  Matrix source) {
+    if (dest.height * dest.width != source.height * source.width) {
+        free(dest.arr);
+        dest.arr = (double *) malloc(source.height * source.width * sizeof(double));
+    }
     dest.height = source.height;
     dest.width = source.width;
 
@@ -79,7 +88,7 @@ void multiplyMatrixOnScalar(Matrix result, Matrix matrix, double scal) {
     }
 }
 
-double multiplyVector(Matrix first, Matrix second) {
+double scalarMultiplicationOfVectors(Matrix first, Matrix second) {
     double result = 0;
     for (int i = 0; i < first.height; ++i) {
         result += first.arr[i] * second.arr[i];
@@ -87,15 +96,27 @@ double multiplyVector(Matrix first, Matrix second) {
     return result;
 }
 
-void writeMatrixToFile(Matrix matrix, char * filename) {
-    FILE * fout = fopen("output.txt", "w+");
+int writeMatrixToFile(Matrix matrix, const char *filename) {
+    FILE * fout = fopen(filename, "w");
+    if (fout == NULL) return -1;
 
     fprintf(fout, "%d %d\n", matrix.height, matrix.width);
-    for (int i = 0; i < matrix.height; ++i) {
-        for (int j = 0; j < matrix.width; ++j) {
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
             fprintf(fout, "%lf ", matrix.arr[realIndex(matrix, i, j)]);
         }
         fprintf(fout, "\n");
     }
     fclose(fout);
+    return 0;
+}
+
+void transposeMatrix(Matrix * out, Matrix in) {
+    (*out) = createMatrix(in.width, in.height);
+
+    for (int i = 0; i < in.height; i++) {
+        for (int j = 0; j < in.width; j++) {
+            out->arr[realIndex(*out, j, i)] = in.arr[realIndex(in, i, j)];
+        }
+    }
 }
