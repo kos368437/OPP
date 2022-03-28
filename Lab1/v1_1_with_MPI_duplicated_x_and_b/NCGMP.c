@@ -3,6 +3,9 @@
 #include <malloc.h>
 #include <mpi.h>
 
+void parallelMultiplyMatrix(Matrix dest, Matrix first, Matrix second, Matrix tempResult, unsigned int *recvcounts,
+                            unsigned int *displs);
+
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     int rank;
     int size;
@@ -48,10 +51,8 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
         copyMatrix(z, rn); // z0 = r0
 
         rnXrn = scalarMultiplicationOfVectors(rn, rn);
-
-        counter = 0;
-    }
-
+   }
+    counter = 0;
     do {
 	    MPI_Bcast(z.arr, z.height, MPI_DOUBLE, 0, MPI_COMM_WORLD);
         parallelMultiplyMatrix(tmpVector, A, z, tempResult, vectorCounts, vectorDispls); // tmpVector = A * z.n
@@ -70,11 +71,11 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
 
             sumMatrix(z, 1, rn, beta, z); // z.n+1 = r.n+1 + beta.n+1 * z.n
 
-            counter++;
-
             notDone = (rnXrn > bXb * (eps * eps));
-
         }
+
+        counter++;
+
         MPI_Bcast(&notDone, 1, MPI_INT, 0, MPI_COMM_WORLD);
         
     } while (notDone);

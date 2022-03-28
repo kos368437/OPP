@@ -4,6 +4,10 @@
 #include <mpi.h>
 #include <stdio.h>
 
+void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
+                                    unsigned int *displs);
+double parallelScalarMultiplication(Matrix first, Matrix second);
+
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

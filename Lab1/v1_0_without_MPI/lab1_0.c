@@ -15,18 +15,16 @@ int main() {
     double best_time = 0;
     double time;
 
-    for (int i = 0; i < 5; ++i) {
-        clock_gettime(CLOCK_REALTIME, &tm_start);
+    clock_gettime(CLOCK_REALTIME, &tm_start);
 
-        iterationCounter = solveSystemUsingNCGM(A, x, b, eps);
+    iterationCounter = solveSystemUsingNCGM(A, x, b, eps);
 
-        clock_gettime(CLOCK_REALTIME, &tm_finish);
+    clock_gettime(CLOCK_REALTIME, &tm_finish);
 
-        time = tm_finish.tv_sec - tm_start.tv_sec + 1e-9 * (tm_finish.tv_nsec - tm_start.tv_nsec);
+    time = tm_finish.tv_sec - tm_start.tv_sec + 1e-9 * (tm_finish.tv_nsec - tm_start.tv_nsec);
 
-        if (best_time == 0 || time < best_time) {
-            best_time = time;
-        }
+    if (best_time == 0 || time < best_time) {
+        best_time = time;
     }
 
     printf("Iterations count: %d\n", iterationCounter);
