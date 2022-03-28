@@ -3,9 +3,6 @@
 #include <time.h>
 #include "NCGMP.h"
 #include <mpi.h>
-#include <malloc.h>
-#include <wait.h>
-
 
 int main(int argc, char * argv[]) {
     
@@ -26,7 +23,7 @@ int main(int argc, char * argv[]) {
              rank,
              size, NULL, NULL);
     if (rank == 0) {
-        x = createMatrix(A.height, 1);
+        x = createMatrix(A.width, 1);
     }
 
     int iterationCounter;

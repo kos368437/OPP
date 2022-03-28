@@ -2,6 +2,6 @@
 #define LAB1_NCGM_H
 #include "../Matrix.h"
 
-void solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps, int * counter);
+int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps);
 
 #endif //LAB1_NCGM_H

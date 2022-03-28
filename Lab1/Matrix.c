@@ -2,6 +2,10 @@
 #include <malloc.h>
 #include <stdio.h>
 
+int realIndex(Matrix matrix, unsigned int row, unsigned int column) {
+    return row * matrix.width + column;
+}
+
 Matrix createMatrix(unsigned int height, unsigned int width) {
     Matrix matrix;
 
@@ -47,10 +51,6 @@ void multiplyMatrix(Matrix dest,  Matrix firstOp,  Matrix secondOp) {
             }
         }
     }
-}
-
-int realIndex(Matrix matrix, unsigned int row, unsigned int column) {
-    return row * matrix.width + column;
 }
 
 void copyMatrix(Matrix dest,  Matrix source) {

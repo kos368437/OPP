@@ -4,7 +4,8 @@
 
 
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps);
-void parallelMultiplyMatrix(Matrix dest, Matrix first, Matrix second, unsigned int *sendcounts, unsigned int *displs);
+void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
+                                    unsigned int *displs);
 double parallelScalarMultiplication(Matrix first, Matrix second);
 
 void initiate(Matrix *A, Matrix *b, char *inputA, char *inputb, int commRank, int commSize, unsigned int *counts,

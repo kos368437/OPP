@@ -26,7 +26,7 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
 
     int notDone = 1;
 
-    unsigned int * vectorSendcounts = initCounts(A.height, 1, size);
+    unsigned int * vectorSendcounts = initCounts(A.width, 1, size);
     unsigned int * vectorDispls = initDispls(size, vectorSendcounts);
 
     rn = createMatrix(b.height, 1);
@@ -52,7 +52,7 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     counter = 0;
 
     do {
-        parallelMultiplyMatrix(tmpVector, A, z, vectorSendcounts, vectorDispls); // tmpVector = A * z.n
+        parallelMultiplyMatrixOnVector(tmpVector, A, z, vectorSendcounts, vectorDispls); // tmpVector = A * z.n
 
         tmpScalar = parallelScalarMultiplication(tmpVector, z); // (A * z.n, z.n)
         alpha = rnXrn / tmpScalar; // alpha.n+1 = (r.n, r.n) / (A * z.n, z.n)
@@ -76,10 +76,10 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     free(vectorSendcounts);
     free(vectorDispls);
 
-    int * recvcounts = initCounts(A.height, 1, size);
+    int * recvcounts = initCounts(A.width, 1, size);
     int * displs = initDispls(size, recvcounts);
 
-    MPI_Gatherv(localx.arr, localx.height, MPI_DOUBLE, x.arr, recvcounts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gatherv(localx.arr, recvcounts[rank], MPI_DOUBLE, x.arr, recvcounts, displs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     free(recvcounts);
     free(displs);
@@ -92,21 +92,32 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     return counter;
 }
 
-void parallelMultiplyMatrix(Matrix dest, Matrix first, Matrix second, unsigned int *sendcounts, unsigned int *displs) {
-    Matrix fullResult;
+void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
+                                    unsigned int *displs) {
+    Matrix fullResultVector;
 
-    Matrix localResult = createMatrix(first.height, second.width);
-    multiplyMatrix(localResult, first, second);
+    vector.width = vector.height;
+    vector.height = 1;
+
+    Matrix localResultVector = createMatrix(vector.height, matrix.width);
+
+    multiplyMatrix(localResultVector, vector, matrix);
+
+    localResultVector.height = localResultVector.width;
+    localResultVector.width = 1;
+
+    vector.height = vector.width;
+    vector.width = 1;
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (rank == 0) {
-        fullResult = createMatrix(first.height, second.width);
+        fullResultVector = createMatrix(matrix.width, 1);
     }
 
-    MPI_Reduce(localResult.arr, fullResult.arr, localResult.height * localResult.width, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(localResultVector.arr, fullResultVector.arr, localResultVector.height, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    MPI_Scatterv(fullResult.arr, sendcounts, displs, MPI_DOUBLE, dest.arr, second.height, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(fullResultVector.arr, sendcounts, displs, MPI_DOUBLE, dest.arr, sendcounts[rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
 }
 
 double parallelScalarMultiplication(Matrix first, Matrix second) {
@@ -136,15 +147,14 @@ void initiate(Matrix *A, Matrix *b, char *inputA, char *inputb, int commRank, in
     counts = initCounts(N, N, commSize);
     displs = initDispls(commSize, counts);
 
-    ATemp = createMatrix(counts[commRank]/N, N);
+    (*A) = createMatrix(counts[commRank]/N, N);
+
     (*b) = createMatrix(counts[commRank]/N, 1);
 
-    MPI_Scatterv(AFull.arr, counts, displs, MPI_DOUBLE, ATemp.arr, counts[commRank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(AFull.arr, counts, displs, MPI_DOUBLE, (*A).arr, counts[commRank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     unsigned int * vectorSendCounts;
     unsigned int * vectorDispls;
-
-    transposeMatrix(A, ATemp);
 
     vectorSendCounts = initCounts(N, 1, commSize);
     vectorDispls = initDispls(commSize, vectorSendCounts);

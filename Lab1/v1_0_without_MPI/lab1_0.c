@@ -5,8 +5,8 @@
 
 int main() {
     const double eps = 1e-5;
-    Matrix A = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/v1_0_without_MPI/InputA.txt");
-    Matrix b = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/v1_0_without_MPI/Inputb.txt");
+    Matrix A = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/InputA.txt");
+    Matrix b = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/Inputb.txt");
 
     int iterationCounter;
     Matrix x = createMatrix(b.height, 1);
@@ -18,7 +18,7 @@ int main() {
     for (int i = 0; i < 5; ++i) {
         clock_gettime(CLOCK_REALTIME, &tm_start);
 
-        solveSystemUsingNCGM(A, x, b, eps, &iterationCounter);
+        iterationCounter = solveSystemUsingNCGM(A, x, b, eps);
 
         clock_gettime(CLOCK_REALTIME, &tm_finish);
 

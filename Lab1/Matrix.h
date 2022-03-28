@@ -18,7 +18,6 @@ void multiplyMatrixOnScalar(Matrix result, Matrix matrix, double scal);
 void fillMatrix(Matrix matrix, double fillEl);
 void transposeMatrix(Matrix * out, Matrix in);
 
-int realIndex(Matrix matrix, unsigned int row, unsigned int column);
 double scalarMultiplicationOfVectors(Matrix first, Matrix second);
 
 int writeMatrixToFile(Matrix matrix, const char *filename);
