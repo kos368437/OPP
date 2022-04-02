@@ -9,33 +9,26 @@ int main(int argc, char * argv[]) {
     
     MPI_Init(&argc, &argv);
     const double eps = 1e-5;
+    const unsigned int N = 10;
     int rank, size;
     Matrix A;
-    Matrix AFull;
     Matrix x;
     Matrix b;
 
     unsigned int * sendcounts;
     unsigned int * displs;
-    unsigned int N = 0;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    if (rank == 0) {
-        AFull = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/InputA.txt");
-        b = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/Inputb.txt");
-        x = createMatrix(b.height, 1);
-        N = AFull.height;
-    }
-
-    MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
     sendcounts = initCounts(size, N, N);
     displs = initDispls(size, sendcounts);
 
-    A = createMatrix(sendcounts[rank]/N, N);
-    MPI_Scatterv(AFull.arr, sendcounts, displs, MPI_DOUBLE, A.arr, sendcounts[rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    A = getStandardSymmetricResolvableMatrix(N, rank, size);
+    b = getStandardRandomResolvableVector(N, rank, size, A);
+    if (rank == 0) {
+        x = createMatrix(b.height, 1);
+    }
 
     free(sendcounts);
     free(displs);
@@ -64,7 +57,6 @@ int main(int argc, char * argv[]) {
         writeMatrixToFile(x, "/home/chaos/Programming/OPP/Lab1/output.txt");
         deleteMatrix(b);
         deleteMatrix(x);
-        deleteMatrix(AFull);
     }
 
     deleteMatrix(A);

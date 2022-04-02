@@ -120,3 +120,11 @@ void transposeMatrix(Matrix * out, Matrix in) {
         }
     }
 }
+
+double get(Matrix matrix, unsigned int row, unsigned int col) {
+    return matrix.arr[realIndex(matrix, row, col)];
+}
+
+void set(Matrix matrix, unsigned int row, unsigned int col, double value) {
+    matrix.arr[realIndex(matrix, row, col)] = value;
+}

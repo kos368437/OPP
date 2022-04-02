@@ -5,8 +5,10 @@
 
 int main() {
     const double eps = 1e-5;
-    Matrix A = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/InputA.txt");
-    Matrix b = readMatrixFromFile("/home/chaos/Programming/OPP/Lab1/Inputb.txt");
+    const unsigned int N = 300;
+
+    Matrix A = getStandardSymmetricResolvableMatrix(N);
+    Matrix b = getStandardRandomResolvableVector(N, A);
 
     int iterationCounter;
     Matrix x = createMatrix(b.height, 1);

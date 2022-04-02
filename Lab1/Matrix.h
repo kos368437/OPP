@@ -16,11 +16,14 @@ void deleteMatrix(Matrix del);
 void sumMatrix(Matrix result, double a, Matrix firstOp, double b, Matrix secondOp); //result = a * first + b * second
 void multiplyMatrixOnScalar(Matrix result, Matrix matrix, double scal);
 void fillMatrix(Matrix matrix, double fillEl);
-void transposeMatrix(Matrix * out, Matrix in);
+
+double get(Matrix matrix, unsigned int row, unsigned int col);
+void set(Matrix matrix, unsigned int row, unsigned int col, double value);
 
 double scalarMultiplicationOfVectors(Matrix first, Matrix second);
 
 int writeMatrixToFile(Matrix matrix, const char *filename);
+void writeMatrixToConsole(Matrix matrix);
 
 
 #endif //LAB1_MATRIX_H

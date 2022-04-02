@@ -4,3 +4,4 @@ project(lab1_2 C)
 add_executable(lab1_2 lab1_2.c NCGMP.c NCGMP.h ../Matrix.c ../Matrix.h)
 
 set(CMAKE_C_COMPILER /usr/bin/mpicc)
+target_link_libraries(lab1_2 -lm)

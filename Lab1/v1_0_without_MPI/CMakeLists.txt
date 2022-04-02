@@ -8,4 +8,4 @@ include_directories(${MPI_INCLUDE_PATH})
 
 SET(CMAKE_C_COMPILER mpicc)
 SET(CMAKE_CXX_COMPILER mpicxx)
-
+target_link_libraries(lab1_0 -lm)

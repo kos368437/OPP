@@ -8,6 +8,8 @@ int main(int argc, char * argv[]) {
     
     MPI_Init(&argc, &argv);
     const double eps = 1e-5;
+    //const double eps = 1e-20;
+    const int N = 10000;
     int rank, size;
     Matrix A;
     Matrix x;
@@ -16,12 +18,10 @@ int main(int argc, char * argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    initiate(&A,
-             &b,
-             "/home/chaos/Programming/OPP/Lab1/v1_2_with_MPI_all-cut/../InputA.txt",
-             "/home/chaos/Programming/OPP/Lab1/v1_2_with_MPI_all-cut/../Inputb.txt",
+    randomInitiate(&A,
+             &b, N,
              rank,
-             size, NULL, NULL);
+             size);
     if (rank == 0) {
         x = createMatrix(A.width, 1);
     }

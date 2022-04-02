@@ -8,4 +8,8 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps);
 unsigned int * initCounts(int commSize, unsigned int height, unsigned int width);
 unsigned int * initDispls(int commSize, const unsigned int * counts);
 
+Matrix getStandardSymmetricResolvableMatrix(unsigned int N, int commRank, int commSize);
+Matrix getStandardResolvableVector(unsigned int N);
+Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commSize, Matrix A);
+
 #endif //LAB1_NCGM_H

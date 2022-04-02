@@ -1,5 +1,7 @@
 #include "NCGM.h"
 #include "../Matrix.h"
+#include <math.h>
+#include <stdio.h>
 
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     Matrix rn = createMatrix(b.height, 1);
@@ -57,3 +59,44 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     return counter;
 }
 
+Matrix getStandardSymmetricResolvableMatrix(unsigned int N) {
+    Matrix matrix = createMatrix(N, N);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            if (i == j) {
+                set(matrix, i, j, 2.0);
+            }
+            else {
+                set(matrix, i, j, 1.0);
+            }
+        }
+    }
+
+    return matrix;
+}
+
+Matrix getStandardResolvableVector(unsigned int N) {
+    Matrix vector = createMatrix(N, 1);
+
+    for (int i = 0; i < vector.height; i++) {
+        set(vector, i, 0, N + 1);
+    }
+
+    return vector;
+}
+
+Matrix getStandardRandomResolvableVector(unsigned int N, Matrix A) {
+    Matrix vector = createMatrix(N, 1);
+    Matrix tempResult = createMatrix(N, 1);
+
+    for (int i = 0; i < tempResult.height; i++) {
+        set(tempResult, i, 0, sin((2 * M_PI * i) / N));
+    }
+
+    multiplyMatrix(vector, A, tempResult);
+
+    deleteMatrix(tempResult);
+
+    return vector;
+}

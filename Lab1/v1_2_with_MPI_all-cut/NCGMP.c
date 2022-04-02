@@ -1,3 +1,4 @@
+#include <math.h>
 #include "NCGMP.h"
 #include "../Matrix.h"
 #include <malloc.h>
@@ -133,40 +134,14 @@ double parallelScalarMultiplication(Matrix first, Matrix second) {
     return fullResult;
 }
 
-void initiate(Matrix *A, Matrix *b, char *inputA, char *inputb, int commRank, int commSize, unsigned int *counts,
-              unsigned int *displs) {
-    Matrix AFull;
-    Matrix ATemp;
-    Matrix bFull;
+void initiate(Matrix *A, Matrix *b, unsigned int N, int commRank, int commSize) {
+    (*A) = getStandardSymmetricResolvableMatrix(N, commRank, commSize);
+    (*b) = getStandardResolvableVector(N, commRank, commSize);
+}
 
-    int N = 0;
-
-    if (commRank == 0) {
-        AFull = readMatrixFromFile(inputA);
-        bFull = readMatrixFromFile(inputb);
-        N = AFull.height;
-    }
-    MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-    counts = initCounts(N, N, commSize);
-    displs = initDispls(commSize, counts);
-
-    (*A) = createMatrix(counts[commRank]/N, N);
-
-    (*b) = createMatrix(counts[commRank]/N, 1);
-
-    MPI_Scatterv(AFull.arr, counts, displs, MPI_DOUBLE, (*A).arr, counts[commRank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    unsigned int * vectorSendCounts;
-    unsigned int * vectorDispls;
-
-    vectorSendCounts = initCounts(N, 1, commSize);
-    vectorDispls = initDispls(commSize, vectorSendCounts);
-
-    MPI_Scatterv(bFull.arr, vectorSendCounts, vectorDispls, MPI_DOUBLE, (*b).arr, vectorSendCounts[commRank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    free(vectorSendCounts);
-    free(vectorDispls);
+void randomInitiate(Matrix *A, Matrix *b, unsigned int N, int commRank, int commSize) {
+    (*A) = getStandardSymmetricResolvableMatrix(N, commRank, commSize);
+    (*b) = getStandardRandomResolvableVector(N, commRank, commSize,(*A));
 }
 
 unsigned int * initCounts(int N, int M, int commSize) {
@@ -189,4 +164,79 @@ unsigned int * initDispls(int commSize, unsigned int * counts) {
         displs[i] = displs[i-1] + counts[i-1];
     }
     return displs;
+}
+
+unsigned int getActualStartRowNumber(unsigned int N, int commRank, int commSize) {
+    unsigned int height = N / commSize;
+    unsigned int actualStartRowNumber;
+
+    if (commRank < N % commSize) {
+        height += 1;
+
+        actualStartRowNumber = commRank * height;
+    }
+    else {
+        actualStartRowNumber = commRank * height + (N % commSize);
+    }
+
+    return actualStartRowNumber;
+}
+
+Matrix getStandardSymmetricResolvableMatrix(unsigned int N, int commRank, int commSize) {
+    unsigned int height = N / commSize;
+    unsigned int actualStartRowNumber = getActualStartRowNumber(N, commRank, commSize);
+
+    if (commRank < N % commSize) {
+        height += 1;
+    }
+
+    Matrix matrix = createMatrix(height, N);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            if (actualStartRowNumber + i == j) {
+                set(matrix, i, j, 2.0);
+            }
+            else {
+                set(matrix, i, j, 1.0);
+            }
+        }
+    }
+
+    return matrix;
+}
+
+Matrix getStandardResolvableVector(unsigned int N, int commRank, int commSize) {
+    unsigned int height = N / commSize;
+    if (commRank < N % commSize) height += 1;
+    Matrix vector = createMatrix(height, 1);
+
+    for (int i = 0; i < vector.height; i++) {
+        set(vector, i, 0, N + 1);
+    }
+
+    return vector;
+}
+
+Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commSize, Matrix A) {
+    unsigned int height = N / commSize;
+    if (commRank < N % commSize) height += 1;
+
+    unsigned int actualStartRowNumber = getActualStartRowNumber(N, commRank, commSize);
+
+    Matrix vector = createMatrix(height, 1);
+
+    for (int i = 0; i < vector.height; i++) {
+        set(vector, i, 0, sin(2 * M_PI * (actualStartRowNumber + i) / N));
+    }
+
+    int * vectorCounts = initCounts(N, 1, commSize);
+    int * vectorDispls = initDispls(commSize, vectorCounts);
+
+    parallelMultiplyMatrixOnVector(vector, A, vector, vectorCounts, vectorDispls);
+
+    free(vectorCounts);
+    free(vectorDispls);
+
+    return vector;
 }

@@ -2,6 +2,7 @@
 #include "../Matrix.h"
 #include <malloc.h>
 #include <mpi.h>
+#include <math.h>
 
 void parallelMultiplyMatrix(Matrix dest, Matrix first, Matrix second, Matrix tempResult, unsigned int *recvcounts,
                             unsigned int *displs);
@@ -120,4 +121,72 @@ unsigned int * initDispls(int commSize, const unsigned int * counts) {
     }
 
     return displs;
+}
+
+unsigned int getActualStartRowNumber(unsigned int N, int commRank, int commSize) {
+    unsigned int height = N / commSize;
+    unsigned int actualStartRowNumber;
+
+    if (commRank < N % commSize) {
+        height += 1;
+
+        actualStartRowNumber = commRank * height;
+    }
+    else {
+        actualStartRowNumber = commRank * height + (N % commSize);
+    }
+
+    return actualStartRowNumber;
+}
+
+Matrix getStandardSymmetricResolvableMatrix(unsigned int N, int commRank, int commSize) {
+    unsigned int height = N / commSize;
+    unsigned int actualStartRowNumber = getActualStartRowNumber(N, commRank, commSize);
+
+    if (commRank < N % commSize) {
+        height += 1;
+    }
+
+    Matrix matrix = createMatrix(height, N);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            if (actualStartRowNumber + i == j) {
+                set(matrix, i, j, 2.0);
+            }
+            else {
+                set(matrix, i, j, 1.0);
+            }
+        }
+    }
+
+    return matrix;
+}
+
+Matrix getStandardResolvableVector(unsigned int N) {
+    Matrix vector = createMatrix(N, 1);
+
+    for (int i = 0; i < vector.height; i++) {
+        set(vector, i, 0, N + 1);
+    }
+
+    return vector;
+}
+
+Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commSize, Matrix A) {
+    Matrix tempResult = createMatrix(A.height, 1);
+    Matrix  vector = createMatrix(N, 1);
+    for (int i = 0; i < vector.height; i++) {
+        set(vector, i, 0, sin((2 * M_PI * i) / N));
+    }
+    int * vectorCounts = initCounts(commSize, N, 1);
+    int * vectorDispls = initDispls(commSize, vectorCounts);
+
+    parallelMultiplyMatrix(vector, A, vector, tempResult, vectorCounts, vectorDispls);
+
+    free(vectorCounts);
+    free(vectorDispls);
+    deleteMatrix(tempResult);
+
+    return vector;
 }
