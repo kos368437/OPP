@@ -48,7 +48,7 @@ int main(int argc, char * argv[]) {
         printf("Iterations count: %d\n", iterationCounter);
         printf("Time elapsed: %lf sec.\n", best_time);
 
-        writeMatrixToFile(x, "/home/chaos/Programming/OPP/Lab1/output.txt");
+        writeMatrixToConsole(x);
 
         deleteMatrix(x);
     }

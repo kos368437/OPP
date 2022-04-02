@@ -54,12 +54,12 @@ int main(int argc, char * argv[]) {
     if (rank == 0) {
         printf("Iterations count: %d\n", iterationCounter);
         printf("Time elapsed: %lf sec.\n", best_time);
-        writeMatrixToFile(x, "/home/chaos/Programming/OPP/Lab1/output.txt");
-        deleteMatrix(b);
+        writeMatrixToConsole(x);
         deleteMatrix(x);
     }
 
     deleteMatrix(A);
+    deleteMatrix(b);
 
     MPI_Finalize();
     return 0;

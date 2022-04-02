@@ -32,7 +32,7 @@ int main() {
     printf("Iterations count: %d\n", iterationCounter);
     printf("Time elapsed: %lf sec.\n", best_time);
 
-    writeMatrixToFile(x, "output.txt");
+    writeMatrixToConsole(x);
 
     deleteMatrix(A);
     deleteMatrix(b);

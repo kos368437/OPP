@@ -1,6 +1,7 @@
 #include "Matrix.h"
 #include <malloc.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int realIndex(Matrix matrix, unsigned int row, unsigned int column) {
     return row * matrix.width + column;
@@ -55,8 +56,7 @@ void multiplyMatrix(Matrix dest,  Matrix firstOp,  Matrix secondOp) {
 
 void copyMatrix(Matrix dest,  Matrix source) {
     if (dest.height * dest.width != source.height * source.width) {
-        free(dest.arr);
-        dest.arr = (double *) malloc(source.height * source.width * sizeof(double));
+        abort();
     }
     dest.height = source.height;
     dest.width = source.width;
@@ -109,6 +109,17 @@ int writeMatrixToFile(Matrix matrix, const char *filename) {
     }
     fclose(fout);
     return 0;
+}
+
+void writeMatrixToConsole(Matrix matrix) {
+    printf("%d %d\n", matrix.height, matrix.width);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            printf("%lf ", matrix.arr[realIndex(matrix, i, j)]);
+        }
+        printf("\n");
+    }
 }
 
 void transposeMatrix(Matrix * out, Matrix in) {
