@@ -7,9 +7,10 @@
 int main(int argc, char * argv[]) {
     
     MPI_Init(&argc, &argv);
+
     const double eps = 1e-5;
-    //const double eps = 1e-20;
-    const int N = 10000;
+    const int N = 300;
+
     int rank, size;
     Matrix A;
     Matrix x;

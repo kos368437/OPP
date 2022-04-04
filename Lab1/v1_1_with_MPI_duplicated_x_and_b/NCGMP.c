@@ -3,6 +3,7 @@
 #include <malloc.h>
 #include <mpi.h>
 #include <math.h>
+#include <stdlib.h>
 
 void parallelMultiplyMatrix(Matrix dest, Matrix first, Matrix second, Matrix tempResult, unsigned int *recvcounts,
                             unsigned int *displs);
@@ -189,4 +190,24 @@ Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commS
     deleteMatrix(tempResult);
 
     return vector;
+}
+
+Matrix getRandomSymmetricMatrix(unsigned int N, int commRank, int commSize) {
+    unsigned int height = N / commSize;
+    unsigned int actualStartRowNumber = getActualStartRowNumber(N, commRank, commSize);
+
+    if (commRank < N % commSize) {
+        height += 1;
+    }
+
+    Matrix matrix = createMatrix(height, N);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            srand(actualStartRowNumber + i + j);
+            set(matrix, i, j,random() % N + 1);
+        }
+    }
+
+    return matrix;
 }

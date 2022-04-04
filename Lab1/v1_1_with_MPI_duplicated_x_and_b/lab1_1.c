@@ -9,7 +9,7 @@ int main(int argc, char * argv[]) {
     
     MPI_Init(&argc, &argv);
     const double eps = 1e-5;
-    const unsigned int N = 10;
+    const unsigned int N = 100;
     int rank, size;
     Matrix A;
     Matrix x;
@@ -24,8 +24,8 @@ int main(int argc, char * argv[]) {
     sendcounts = initCounts(size, N, N);
     displs = initDispls(size, sendcounts);
 
-    A = getStandardSymmetricResolvableMatrix(N, rank, size);
-    b = getStandardRandomResolvableVector(N, rank, size, A);
+    A = getRandomSymmetricMatrix(N, rank, size);
+    b = getStandardResolvableVector(N);
     if (rank == 0) {
         x = createMatrix(b.height, 1);
     }

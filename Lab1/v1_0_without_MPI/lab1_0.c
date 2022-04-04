@@ -7,8 +7,8 @@ int main() {
     const double eps = 1e-5;
     const unsigned int N = 300;
 
-    Matrix A = getStandardSymmetricResolvableMatrix(N);
-    Matrix b = getStandardRandomResolvableVector(N, A);
+    Matrix A = getRandomSymmetricMatrix(N);
+    Matrix b = getStandardResolvableVector(N);
 
     int iterationCounter;
     Matrix x = createMatrix(b.height, 1);

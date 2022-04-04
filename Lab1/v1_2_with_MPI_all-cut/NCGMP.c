@@ -4,6 +4,7 @@
 #include <malloc.h>
 #include <mpi.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
                                     unsigned int *displs);
@@ -140,8 +141,8 @@ void initiate(Matrix *A, Matrix *b, unsigned int N, int commRank, int commSize) 
 }
 
 void randomInitiate(Matrix *A, Matrix *b, unsigned int N, int commRank, int commSize) {
-    (*A) = getStandardSymmetricResolvableMatrix(N, commRank, commSize);
-    (*b) = getStandardRandomResolvableVector(N, commRank, commSize,(*A));
+    (*A) = getRandomSymmetricMatrix(N, commRank, commSize);
+    (*b) = getStandardResolvableVector(N, commRank, commSize );
 }
 
 unsigned int * initCounts(int N, int M, int commSize) {
@@ -239,4 +240,25 @@ Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commS
     free(vectorDispls);
 
     return vector;
+}
+
+
+Matrix getRandomSymmetricMatrix(unsigned int N, int commRank, int commSize) {
+    unsigned int height = N / commSize;
+    unsigned int actualStartRowNumber = getActualStartRowNumber(N, commRank, commSize);
+
+    if (commRank < N % commSize) {
+        height += 1;
+    }
+
+    Matrix matrix = createMatrix(height, N);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            srandom(actualStartRowNumber + i + j);
+            set(matrix, i, j, random() % N + 1);
+        }
+    }
+
+    return matrix;
 }

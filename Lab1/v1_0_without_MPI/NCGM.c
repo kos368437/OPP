@@ -2,6 +2,7 @@
 #include "../Matrix.h"
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     Matrix rn = createMatrix(b.height, 1);
@@ -100,3 +101,20 @@ Matrix getStandardRandomResolvableVector(unsigned int N, Matrix A) {
 
     return vector;
 }
+
+Matrix getRandomSymmetricMatrix(unsigned int N) {
+    Matrix matrix = createMatrix(N, N);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            srandom(i+j);
+
+            set(matrix, i, j, random() % N + 1);
+
+       }
+    }
+
+    return matrix;
+}
+
+

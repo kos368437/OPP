@@ -14,4 +14,5 @@ unsigned int * initDispls(int commSize, unsigned int * counts);
 Matrix getStandardSymmetricResolvableMatrix(unsigned int N, int commRank, int commSize);
 Matrix getStandardResolvableVector(unsigned int N, int commRank, int commSize);
 Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commSize, Matrix A);
+Matrix getRandomSymmetricMatrix(unsigned int N, int commRank, int commSize);
 #endif //LAB1_NCGMP_H
