@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../Matrix.h"
+#include "Matrix.h"
 #include <time.h>
 #include "ParallelMultiplication.h"
 #include <mpi.h>

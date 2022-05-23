@@ -2,9 +2,6 @@
 #include "Matrix.h"
 
 
-int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps);
-
-//void initiate(Matrix *A, Matrix *b, unsigned int N, int commRank, int commSize);
 void randomInitiate(Matrix *A, Matrix *B_trans, Matrix *C, unsigned int N1, unsigned int N2, unsigned int N3);
 
 int * initCounts(unsigned int height, unsigned int width, int commSize);
