@@ -8,10 +8,3 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm -fopenmp")
 add_executable(lab2_1 lab2_1.c NCGM.c NCGM.h Matrix.c Matrix.h)
 target_link_libraries(lab2_1 -lm)
 
-#find_package(MPI REQUIRED)
-#include_directories(${MPI_INCLUDE_PATH})
-
-
-#SET(CMAKE_C_COMPILER mpicc)
-#SET(CMAKE_CXX_COMPILER mpicxx)
-#target_link_libraries(lab2_1 -lm)

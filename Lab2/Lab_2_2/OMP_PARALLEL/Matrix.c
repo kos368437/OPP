@@ -103,6 +103,8 @@ void multiplyMatrixOnScalar(Matrix result, Matrix matrix, double scal) {
 double scalarMultiplicationOfVectors(Matrix first, Matrix second) {
     double result = 0;
 
+#pragma omp for
+
     for (int i = 0; i < first.height; ++i) {
         result += first.arr[i] * second.arr[i];
     }
