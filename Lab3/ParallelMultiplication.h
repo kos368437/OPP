@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include "../Matrix.h"
+#include "Matrix.h"
 
 
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps);
@@ -15,10 +15,6 @@ parallelMatrixMultiplication(Matrix result, Matrix f_op, Matrix s_op_trans, int 
                              MPI_Comm GridComm, MPI_Comm RowComm, MPI_Comm ColComm, unsigned int N1,
                              unsigned int N2, unsigned int N3);
 
-//Matrix getStandardSymmetricResolvableMatrix(unsigned int N, int commRank, int commSize);
-//Matrix getStandardResolvableVector(unsigned int N, int commRank, int commSize);
-//Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commSize, Matrix A);
-//Matrix getRandomSymmetricMatrix(unsigned int N, int commRank, int commSize);
 
 Matrix getRandomSymmetricMatrix(unsigned int N, unsigned int M);
 
