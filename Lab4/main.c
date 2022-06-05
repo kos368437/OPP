@@ -10,11 +10,12 @@ int main(int argc, char * argv[]) {
     BoolMatrix grid;
     int height = atoi(argv[1]), width = atoi(argv[2]);
     int rank, size;
+    int iterationsToStop = atoi(argv[3]);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
     initGliderGrid(&grid, height, width, rank, size);
-    gameOfLifeParallel(grid, rank, size);
+    gameOfLifeParallel(grid, rank, size, iterationsToStop);
 
     deleteBoolMatrix(grid);
 

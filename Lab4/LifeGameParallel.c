@@ -12,10 +12,12 @@ bool newCellState(BoolMatrix * activeGrid, int row, int col, BoolMatrix upperEdg
 void swap(BoolMatrix ** first, BoolMatrix ** second);
 void updateEdgeRow(BoolMatrix * activeGrid, BoolMatrix  * bufferGrid, unsigned int row, BoolMatrix upperNeighbourRowBuffer, BoolMatrix lowerNeighbourRowBuffer, MPI_Request * request);
 bool isSame(BoolMatrix fMatrix, BoolMatrix sMatrix);
-bool isTimeToStop(bool * stopFlags, int commSize);
+bool gridChanged(bool * stopFlags, int commSize);
+bool stopCountReached(unsigned int counter, unsigned int stopCount);
 
-void gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize) {
+void gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize, unsigned int iterationsToStop) {
 
+    unsigned int iterationCounter = 0;
     bool stopFlags[commSize];
     bool stopFlag;
     BoolMatrix * activeGrid;
@@ -43,7 +45,9 @@ void gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize) {
 
         swap(&activeGrid, &bufferGrid);
         sleep(1);
-    } while (!isTimeToStop(stopFlags, commSize));
+
+        iterationCounter++;
+    } while (gridChanged(stopFlags, commSize) && !stopCountReached(iterationCounter, iterationsToStop));
 
     deleteBoolMatrix(gridBuffer);
     deleteBoolMatrix(lowerNeighbourRow);
@@ -112,7 +116,8 @@ bool newCellState(BoolMatrix * activeGrid, int row, int col, BoolMatrix upperEdg
         }
     }
 
-    if (newState = get(*activeGrid, row, col)) {
+    newState = get(*activeGrid, row, col);
+    if (newState) {
         if ((alive < 2) || (alive > 3)) {
             newState = false;
         }
@@ -208,9 +213,20 @@ bool isSame(BoolMatrix fMatrix, BoolMatrix sMatrix) {
     return true;
 }
 
-bool isTimeToStop(bool * stopFlags, int commSize) {
-    for (int i = 0; i < commSize; i++) {
-        if (!stopFlags[i]) return false;
+bool stopCountReached(unsigned int counter, unsigned int stopCount) {
+
+    if (stopCount > 0) {
+        if (counter == stopCount) return true;
     }
-    return true;
+
+    return false;
+}
+
+bool gridChanged(bool * stopFlags, int commSize) {
+
+    for (int i = 0; i < commSize; i++) {
+        if (!stopFlags[i]) return true;
+    }
+
+    return false;
 }

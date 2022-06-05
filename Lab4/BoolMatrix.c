@@ -44,6 +44,6 @@ bool get(BoolMatrix boolMatrix, unsigned int row, unsigned int col) {
     return boolMatrix.arr[realIndex(boolMatrix, row, col)];
 }
 
-void set(BoolMatrix boolMatrix, unsigned int row, unsigned int col, double value) {
+void set(BoolMatrix boolMatrix, unsigned int row, unsigned int col, bool value) {
     boolMatrix.arr[realIndex(boolMatrix, row, col)] = value;
 }
