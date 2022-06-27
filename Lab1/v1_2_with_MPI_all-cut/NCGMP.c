@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
-                                    unsigned int *displs);
+                                    unsigned int *displs, Matrix localResultVector, Matrix fullResultVector, int rank);
 double parallelScalarMultiplication(Matrix first, Matrix second);
 
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
@@ -20,6 +20,11 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     Matrix tmpVector;
     Matrix rn;
     Matrix localx;
+    Matrix multiplicationLocalBuffer = createMatrix(1, A.width);
+    Matrix multiplicationResultBuffer;
+    if (rank == 0) {
+        multiplicationResultBuffer = createMatrix(A.width, 1);
+    }
 
     double tmpScalar;
     double alpha;
@@ -58,7 +63,7 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     counter = 0;
 
     do {
-        parallelMultiplyMatrixOnVector(tmpVector, A, z, vectorSendcounts, vectorDispls); // tmpVector = A * z.n
+        parallelMultiplyMatrixOnVector(tmpVector, A, z, vectorSendcounts, vectorDispls, multiplicationLocalBuffer, multiplicationResultBuffer, rank); // tmpVector = A * z.n
 
         tmpScalar = parallelScalarMultiplication(tmpVector, z); // (A * z.n, z.n)
         alpha = rnXrn / tmpScalar; // alpha.n+1 = (r.n, r.n) / (A * z.n, z.n)
@@ -94,18 +99,18 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     deleteMatrix(tmpVector);
     deleteMatrix(rn);
     deleteMatrix(z);
+    deleteMatrix(multiplicationLocalBuffer);
+    if (rank == 0) {
+        deleteMatrix(multiplicationResultBuffer);
+    }
 
     return counter;
 }
 
 void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
-                                    unsigned int *displs) {
-    Matrix fullResultVector;
-
+                                    unsigned int *displs, Matrix localResultVector, Matrix fullResultVector, int rank) {
     vector.width = vector.height;
     vector.height = 1;
-
-    Matrix localResultVector = createMatrix(vector.height, matrix.width);
 
     multiplyMatrix(localResultVector, vector, matrix);
 
@@ -114,12 +119,6 @@ void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, u
 
     vector.height = vector.width;
     vector.width = 1;
-
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if (rank == 0) {
-        fullResultVector = createMatrix(matrix.width, 1);
-    }
 
     MPI_Reduce(localResultVector.arr, fullResultVector.arr, localResultVector.height, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
@@ -226,6 +225,8 @@ Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commS
     unsigned int actualStartRowNumber = getActualStartRowNumber(N, commRank, commSize);
 
     Matrix vector = createMatrix(height, 1);
+    Matrix localResultVectorBuffer = createMatrix(1, A.width);
+    Matrix fullResultVectorBuffer = createMatrix(A.width, 1);
 
     for (int i = 0; i < vector.height; i++) {
         set(vector, i, 0, sin(2 * M_PI * (actualStartRowNumber + i) / N));
@@ -234,7 +235,7 @@ Matrix getStandardRandomResolvableVector(unsigned int N, int commRank, int commS
     int * vectorCounts = initCounts(N, 1, commSize);
     int * vectorDispls = initDispls(commSize, vectorCounts);
 
-    parallelMultiplyMatrixOnVector(vector, A, vector, vectorCounts, vectorDispls);
+    parallelMultiplyMatrixOnVector(vector, A, vector, vectorCounts, vectorDispls, localResultVectorBuffer, fullResultVectorBuffer, commRank);
 
     free(vectorCounts);
     free(vectorDispls);

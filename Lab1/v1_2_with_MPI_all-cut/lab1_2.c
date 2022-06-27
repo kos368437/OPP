@@ -9,7 +9,7 @@ int main(int argc, char * argv[]) {
     MPI_Init(&argc, &argv);
 
     const double eps = 1e-5;
-    const int N = 300;
+    const int N = 1500;
 
     int rank, size;
     Matrix A;
@@ -49,7 +49,7 @@ int main(int argc, char * argv[]) {
         printf("Iterations count: %d\n", iterationCounter);
         printf("Time elapsed: %lf sec.\n", best_time);
 
-        writeMatrixToConsole(x);
+        // writeMatrixToConsole(x);
 
         deleteMatrix(x);
     }
