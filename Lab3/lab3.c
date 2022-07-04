@@ -9,7 +9,7 @@ int main(int argc, char * argv[]) {
     
     MPI_Init(&argc, &argv);
 
-    const int N1 = atoi(argv[0]), N2 = atoi(argv[1]), N3 = atoi(argv[2]);
+    const int N1 = atoi(argv[1]), N2 = atoi(argv[2]), N3 = atoi(argv[3]);
 
     Matrix A;
     Matrix B_trans;

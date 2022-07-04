@@ -133,6 +133,8 @@ void assembleResult(Matrix result, Matrix local_result, int *row_assemble_counts
         deleteMatrix(transposed_row);
     }
 
+    deleteMatrix(local_result_transposed);
+
     free(row_assemble_displs);
     free(assemble_result_displs);
 }
