@@ -132,7 +132,6 @@ void assembleResult(Matrix result, Matrix local_result, int *row_assemble_counts
 
         deleteMatrix(transposed_row);
     }
-
     deleteMatrix(local_result_transposed);
 
     free(row_assemble_displs);
@@ -156,6 +155,12 @@ void randomInitiate(Matrix *A, Matrix *B_trans, Matrix *C, unsigned int N1, unsi
 
     (*A) = getRandomSymmetricMatrix(N1, N2);
     (*B_trans) = getRandomSymmetricMatrix(N3, N2);
+    (*C) = createMatrix(N1, N3);
+}
+
+void initiate(Matrix *A, Matrix *B_trans, Matrix *C, unsigned int N1, unsigned int N2, unsigned int N3) {
+    (*A) = getMatrix(N1, N2);
+    (*B_trans) = getMatrix(N3, N2);
     (*C) = createMatrix(N1, N3);
 }
 
@@ -194,6 +199,19 @@ Matrix getRandomSymmetricMatrix(unsigned int N, unsigned int M) {
         for (int j = 0; j < matrix.width; j++) {
             srandom(i + j);
             set(matrix, i, j, random() % N + 1);
+        }
+    }
+
+    return matrix;
+}
+
+Matrix getMatrix(unsigned int N, unsigned int M) {
+
+    Matrix matrix = createMatrix(N, M);
+
+    for (int i = 0; i < matrix.height; i++) {
+        for (int j = 0; j < matrix.width; j++) {
+            set(matrix, i, j, i + j);
         }
     }
 

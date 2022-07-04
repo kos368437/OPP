@@ -44,7 +44,8 @@ int main(int argc, char * argv[]) {
     MPI_Cart_sub(GridComm, subdims, &ColComm);
 
     if (rank == 0) {
-        randomInitiate(&A, &B_trans, &C, N1, N2, N3);
+        //randomInitiate(&A, &B_trans, &C, N1, N2, N3);
+        initiate(&A, &B_trans, &C, N1, N2, N3);
     }
 
     clock_gettime(CLOCK_REALTIME, &tm_start);
