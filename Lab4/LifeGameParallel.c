@@ -1,3 +1,4 @@
+
 #include "LifeGameParallel.h"
 #include <mpi.h>
 #include <malloc.h>
@@ -15,7 +16,7 @@ bool isSame(BoolMatrix fMatrix, BoolMatrix sMatrix);
 bool gridChanged(bool * stopFlags, int commSize);
 bool stopCountReached(unsigned int counter, unsigned int stopCount);
 
-void gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize, unsigned int iterationsToStop) {
+int gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize, unsigned int iterationsToStop) {
 
     unsigned int iterationCounter = 0;
     bool stopFlags[commSize];
@@ -33,7 +34,7 @@ void gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize, unsigned in
         updateGridState(activeGrid, bufferGrid, upperNeighbourRow, lowerNeighbourRow, commRank, commSize);
         stopFlag = isSame(*activeGrid, *bufferGrid);
         MPI_Allgather(&stopFlag, 1, MPI_C_BOOL, stopFlags, 1, MPI_C_BOOL, MPI_COMM_WORLD);
-
+/*
         if (commRank == 0) printf("\n");
         for (int i = 0; i < commSize; i++) {
             if (i == commRank) {
@@ -42,9 +43,9 @@ void gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize, unsigned in
             MPI_Barrier(MPI_COMM_WORLD);
         }
 
-
+*/
         swap(&activeGrid, &bufferGrid);
-        sleep(1);
+       // sleep(1);
 
         iterationCounter++;
     } while (gridChanged(stopFlags, commSize) && !stopCountReached(iterationCounter, iterationsToStop));
@@ -52,6 +53,8 @@ void gameOfLifeParallel(BoolMatrix grid, int commRank, int commSize, unsigned in
     deleteBoolMatrix(gridBuffer);
     deleteBoolMatrix(lowerNeighbourRow);
     deleteBoolMatrix(upperNeighbourRow);
+
+    return iterationCounter;
 }
 
 void updateGridState(BoolMatrix * activeGrid, BoolMatrix * bufferGrid, BoolMatrix upperNeighbourRowBuffer, BoolMatrix lowerNeighbourRowBuffer, int commRank, int commSize) {

@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
-                                    unsigned int *displs, Matrix localResultVector, Matrix fullResultVector, int rank);
+void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, int *sendcounts,
+                                    int *displs, Matrix localResultVector, Matrix fullResultVector, int rank);
 double parallelScalarMultiplication(Matrix first, Matrix second);
 
 int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
@@ -37,8 +37,8 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
 
     int notDone = 1;
 
-    unsigned int * vectorSendcounts = initCounts(A.width, 1, size);
-    unsigned int * vectorDispls = initDispls(size, vectorSendcounts);
+    int * vectorSendcounts = initCounts(A.width, 1, size);
+    int * vectorDispls = initDispls(size, vectorSendcounts);
 
     rn = createMatrix(b.height, 1);
     tmpVector = createMatrix(b.height, 1);
@@ -81,7 +81,7 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
         counter++;
 
         notDone = (rnXrn > bXb * (eps * eps));
-        
+
     } while (notDone);
 
     free(vectorSendcounts);
@@ -107,8 +107,8 @@ int solveSystemUsingNCGM(Matrix A, Matrix x, Matrix b, double eps) {
     return counter;
 }
 
-void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, unsigned int *sendcounts,
-                                    unsigned int *displs, Matrix localResultVector, Matrix fullResultVector, int rank) {
+void parallelMultiplyMatrixOnVector(Matrix dest, Matrix matrix, Matrix vector, int *sendcounts,
+                                    int *displs, Matrix localResultVector, Matrix fullResultVector, int rank) {
     vector.width = vector.height;
     vector.height = 1;
 
@@ -144,9 +144,9 @@ void randomInitiate(Matrix *A, Matrix *b, unsigned int N, int commRank, int comm
     (*b) = getStandardResolvableVector(N, commRank, commSize );
 }
 
-unsigned int * initCounts(int N, int M, int commSize) {
-    unsigned int * counts;
-    counts = (unsigned int*)malloc(commSize * sizeof(unsigned int));
+int * initCounts(int N, int M, int commSize) {
+    int * counts;
+    counts = (int*)malloc(commSize * sizeof(int));
     for (int i = 0; i < commSize; ++i) {
         counts[i] = N / commSize;
         if (i < N % commSize) {
@@ -156,9 +156,9 @@ unsigned int * initCounts(int N, int M, int commSize) {
     }
     return counts;
 }
-unsigned int * initDispls(int commSize, unsigned int * counts) {
-    unsigned int * displs;
-    displs = (unsigned int*)malloc(commSize * sizeof(unsigned int));
+int * initDispls(int commSize, int *counts) {
+    int * displs;
+    displs = (int*)malloc(commSize * sizeof(int));
     displs[0] = 0;
     for (int i = 1; i < commSize; i++) {
         displs[i] = displs[i-1] + counts[i-1];
