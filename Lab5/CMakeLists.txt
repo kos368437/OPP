@@ -5,7 +5,6 @@ find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
 
 SET(CMAKE_C_COMPILER mpicc)
-
 set(CMAKE_C_STANDARD 11)
 
 add_executable(Lab_5 main.c )

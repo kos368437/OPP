@@ -107,33 +107,28 @@ double doTasks(TaskList *taskList, double *workTime_return, int commRank, int co
     struct timespec tm_start, tm_finish;
     int i = 0;
     double result = 0;
-    int remainedTasksCount;
-
-    pthread_mutex_lock(&(taskList->mutex_taskList));
-    remainedTasksCount = taskList->remainedTasksCount;
-    pthread_mutex_unlock(&(taskList->mutex_taskList));
 
     clock_gettime(CLOCK_REALTIME, &tm_start);
 
     while (1) {
-        i = 0;
-        while (remainedTasksCount > 0) {
+        pthread_mutex_lock(&(taskList->mutex_taskList));
+        taskList->remainedTasksCount -= 1;
+        i = taskList->remainedTasksCount;
+        pthread_mutex_unlock(&(taskList->mutex_taskList));
+        while (i > 0) {
             for (int j = 0; j < taskList->taskList[i]; j++) {
                 result += sin(j);
             }
-            i++;
-            remainedTasksCount -= 1;
+            pthread_mutex_lock(&(taskList->mutex_taskList));
+            taskList->remainedTasksCount -= 1;
+            i = taskList->remainedTasksCount;
+            pthread_mutex_unlock(&(taskList->mutex_taskList));
         }
-        pthread_mutex_lock(&(taskList->mutex_taskList));
-        taskList->remainedTasksCount = remainedTasksCount;
-        pthread_mutex_unlock(&(taskList->mutex_taskList));
+//        pthread_mutex_lock(&(taskList->mutex_taskList));
+//        taskList->remainedTasksCount = remainedTasksCount;
+//        pthread_mutex_unlock(&(taskList->mutex_taskList));
         if (askForExtraTasks(taskList, commRank, commSize) < 1) {
             break;
-        }
-        else {
-            pthread_mutex_lock(&(taskList->mutex_taskList));
-            remainedTasksCount = taskList->remainedTasksCount;
-            pthread_mutex_unlock(&(taskList->mutex_taskList));
         }
     }
 
